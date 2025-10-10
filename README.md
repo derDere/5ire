@@ -80,6 +80,41 @@ Visit [Wiki](https://deepwiki.com/nanbingxyz/5ire) for more details.
 
 # Features
 
+## 🚀 Command Line Startup Arguments
+
+5ire now supports command line arguments to quickly launch the app with pre-configured settings. You can automatically create a new chat with your preferred model, system message, initial prompt, and temperature settings.
+
+### Usage
+
+```bash
+# Basic new chat
+5ire --new-chat
+
+# New chat with specific model and prompt
+5ire --new-chat --model gpt-5-chat --prompt "Help me with coding"
+
+# Complete configuration
+5ire --new-chat \
+     --model gpt-5-mini \
+     --system-message "You are a helpful coding assistant" \
+     --prompt "Review this JavaScript function" \
+     --temperature 0.7
+
+# Show help
+5ire --help
+```
+
+### Available Options
+
+- `--new-chat` - Create a new chat on startup
+- `--model <model>` - Set the model (e.g., gpt-5-chat, gpt-5-mini, gpt-5-nano)  
+- `--system-message <text>` - Set system message/instruction for the chat
+- `--prompt <text>` - Set initial prompt that will be sent automatically
+- `--temperature <number>` - Set temperature (0-2, default: 0.9)
+- `--help` - Show help message with all options
+
+This feature is perfect for developers who want to quickly jump into specific AI workflows or create shortcuts for common tasks.
+
 ## ⚒️ Support Tools via MCP Servers
 
 MCP is an open protocol that standardizes how applications provide context to LLMs. Think of MCP like a USB-C port for AI applications. Just as USB-C provides a standardized way to connect your devices to various peripherals and accessories, MCP provides a standardized way to connect AI models to different data sources and tools.
