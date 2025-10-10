@@ -169,6 +169,7 @@ const electronHandler = {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   getNativeTheme: () => ipcRenderer.invoke('get-native-theme'),
   getSystemLanguage: () => ipcRenderer.invoke('get-system-language'),
+  getStartupArgs: () => ipcRenderer.invoke('get-startup-args'),
   selectImageWithBase64: () => ipcRenderer.invoke('select-image-with-base64'),
   setTheme: (theme: ThemeType) => ipcRenderer.send('theme-changed', theme),
   embeddings: {
