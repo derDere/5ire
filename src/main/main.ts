@@ -60,6 +60,83 @@ logging.init();
 
 logging.info('Main process start...');
 
+// Command line argument parsing for startup options
+interface StartupArgs {
+  newChat?: boolean;
+  model?: string;
+  systemMessage?: string;
+  prompt?: string;
+  temperature?: number;
+}
+
+const parseStartupArgs = (): StartupArgs => {
+  const args = process.argv.slice(2);
+  const startupArgs: StartupArgs = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    const nextArg = args[i + 1];
+    
+    switch (arg) {
+      case '--new-chat':
+        startupArgs.newChat = true;
+        break;
+      case '--model':
+        if (nextArg && !nextArg.startsWith('--')) {
+          startupArgs.model = nextArg;
+          i++; // Skip next argument as it's the value
+        }
+        break;
+      case '--system-message':
+        if (nextArg && !nextArg.startsWith('--')) {
+          startupArgs.systemMessage = nextArg;
+          i++; // Skip next argument as it's the value
+        }
+        break;
+      case '--prompt':
+        if (nextArg && !nextArg.startsWith('--')) {
+          startupArgs.prompt = nextArg;
+          i++; // Skip next argument as it's the value
+        }
+        break;
+      case '--temperature':
+        if (nextArg && !nextArg.startsWith('--')) {
+          const temp = parseFloat(nextArg);
+          if (!isNaN(temp) && temp >= 0 && temp <= 2) {
+            startupArgs.temperature = temp;
+          }
+          i++; // Skip next argument as it's the value
+        }
+        break;
+      case '--help':
+        console.log(`
+5ire - AI Assistant Desktop Application
+
+Usage: 5ire [options]
+
+Options:
+  --new-chat                    Create a new chat on startup
+  --model <model>              Set the model for the new chat (e.g., gpt-5-chat, gpt-5-mini)
+  --system-message <message>   Set system message/instruction for the chat
+  --prompt <text>              Set initial prompt for the chat
+  --temperature <number>       Set temperature (0-2, default: 0.9)
+  --help                       Show this help message
+
+Examples:
+  5ire --new-chat --model gpt-5-chat --prompt "Hello, help me with coding"
+  5ire --new-chat --model gpt-5-mini --temperature 0.5 --system-message "You are a helpful assistant"
+        `);
+        process.exit(0);
+        break;
+    }
+  }
+  
+  return startupArgs;
+};
+
+const startupArgs = parseStartupArgs();
+logging.info('Startup args:', startupArgs);
+
 const isDarwin = process.platform === 'darwin';
 const isWin32 = process.platform === 'win32';
 
@@ -919,6 +996,11 @@ ipcMain.handle('DocumentLoader::loadFromURI', (_, url, mimeType) => {
 });
 ipcMain.handle('DocumentLoader::loadFromFilePath', (_, file, mimeType) => {
   return DocumentLoader.loadFromFilePath(file, mimeType);
+});
+
+// Handle startup arguments request from renderer
+ipcMain.handle('get-startup-args', () => {
+  return startupArgs;
 });
 
 if (process.env.NODE_ENV === 'production') {

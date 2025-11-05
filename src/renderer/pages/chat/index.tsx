@@ -232,6 +232,59 @@ export default function Chat() {
     }
   }, [chatSidebarShow]);
 
+  // Handle startup arguments for auto-creating new chat
+  useEffect(() => {
+    const handleStartupArgs = async () => {
+      try {
+        const startupArgs = await window.electron.getStartupArgs();
+        
+        if (startupArgs?.newChat && activeChatId === TEMP_CHAT_ID) {
+          // Only auto-create if we're in temp chat mode and --new-chat was specified
+          const chatData: Partial<IChat> = {
+            summary: startupArgs.prompt?.substring(0, 50) || 'New Chat from CLI',
+          };
+          
+          // Set model if provided
+          if (startupArgs.model) {
+            chatData.model = startupArgs.model;
+            // Also need to set provider - in this case assume 5ire as default for the models
+            chatData.provider = '5ire';
+          }
+          
+          // Set system message if provided  
+          if (startupArgs.systemMessage) {
+            chatData.systemMessage = startupArgs.systemMessage;
+          }
+          
+          // Set temperature if provided
+          if (startupArgs.temperature !== undefined) {
+            chatData.temperature = startupArgs.temperature;
+          }
+          
+          // Create the chat
+          const newChat = await createChat(chatData);
+          setActiveChatId(newChat.id);
+          navigate(`/chats/${newChat.id}`);
+          
+          // If there's a prompt, send it immediately
+          if (startupArgs.prompt) {
+            setTimeout(() => {
+              onSubmit(startupArgs.prompt as string);
+            }, 500); // Small delay to ensure chat is fully initialized
+          }
+        }
+      } catch (error) {
+        console.error('Error handling startup args:', error);
+      }
+    };
+    
+    // Only run this once when the component mounts and we're in temp chat
+    if (activeChatId === TEMP_CHAT_ID) {
+      handleStartupArgs();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array to run only once
+
   const verticalSashRender = () => <div className="border-t border-base" />;
   const horizontalSashRender = () => <div className="border-l border-base" />;
 
